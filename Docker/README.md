@@ -15,7 +15,7 @@ Port `4000` is for Quanta communication (GRPC) from the `quanta-proxy` to the no
 
 5) The Quanta proxy will require a modest (r5n.2xlarge) with no additional storage and the same pre-requisite as step #3.
 
-6) Log into the `quanta-node` hosts created in step #3 and pull the `quanta-node` docker image from `containerregistry.disney.com/digital/quanta-node:latest`.  Then follow [THIS LINK](https://github.com/disney/quanta/tree/master/Docker#configuration-of-a-quanta-node) to configure it.  You can find the configuration files [HERE](https://github.com/disney/quanta/tree/master/configuration) and copy them directly.  Configure the entire stack to start at boot using this [LINK](https://github.com/disney/quanta/tree/master/Docker#launching-a-quanta-node-at-boot).  Do this step for all nodes.  Reboot them as you go.
+6) Log into the `quanta-node` hosts created in step #3 and pull the `quanta-node` docker image from `<docker_repository>`.  Then follow [THIS LINK](https://github.com/disney/quanta/tree/master/Docker#configuration-of-a-quanta-node) to configure it.  You can find the configuration files [HERE](https://github.com/disney/quanta/tree/master/configuration) and copy them directly.  Configure the entire stack to start at boot using this [LINK](https://github.com/disney/quanta/tree/master/Docker#launching-a-quanta-node-at-boot).  Do this step for all nodes.  Reboot them as you go.
 
 7) Log into the `quanta-proxy` and `quanta-loader` hosts and pull their respective docker images using the same base URI.  The configuration files are already pre-loaded into the docker images.  The `quanta-proxy` can be configured to auto-start using this [LINK](https://github.com/disney/quanta/tree/master/Docker#launching-the-quanta-proxy-at-boot).  The `quanta-proxy` node should be rebooted as well.
 
@@ -24,7 +24,7 @@ Port `4000` is for Quanta communication (GRPC) from the `quanta-proxy` to the no
 ![Architecture](../docs/Quanta_Deployment_Architecture.png)
 
 # Overview of Docker Images
-In normal production deployments, Docker images can be retrieved directly from Quay (containerregistry.disney.com) and pushed into the Cloud via TeamCity.  Then the desired orchestration services can host the images (i.e. AWS ECS or Kubernetes).
+In normal production deployments, Docker images can be retrieved directly from a docker repository.  Then the desired orchestration services can host the images (i.e. AWS ECS or Kubernetes).
 For development sandboxing and testing the images can be built from source and deployed as desired.  The information cotained in this documentation can be utilized for either manual deployment or used as a basis for configuring orchestration services.
 
 The **quanta-node** docker image should be is installed/configured to run as a service daemon via SysV mechanisms (`systemctl`/`initctl`).  All logging of the service is to STDOUT or STDERR of the container.  A minimum of 3 nodes are required on substantial hardware as nodes require significant amounts of RAM to host data (r5n-12xlarge on AWS).  For production a 10-15 node configuration will be required to host 90 days of online data.  Most of the "heavy lifting" during the processing of queries occurs on the nodes.  For data file storage EBS volumes of 400 GiB in size on volume type gp2 for an IOPS throuput of 1200.
@@ -97,7 +97,7 @@ Follow these steps:
 git clone git@github.com:disney/quanta.git
 cd quanta
 make build_all
-docker build -t containerregistry.disney.com/digital/quanta-node:latest -f Docker/Dockerfile .
+docker build -t <docker_repository> -f Docker/Dockerfile .
 ```
 Note that you should specify your environment specific repo for the `-t` flag (ECR for AWS).  If you do not
 already have one for `quanta-node` you can create it using the AWS CLI as follows:
@@ -114,7 +114,7 @@ aws ecr get-login --no-include-email --region us-east-1
 2) This will return a docker login script with an access token.  Run that script.
 3)  Now, push the image:
 ```bash
-docker push containerregistry.disney.com/digital/quanta-node:latest
+docker push <docker_repository>
 ```
 You should substitute your repository URL or course. Your image is now available for deployment.
 
@@ -127,13 +127,13 @@ make build_all
 ```
 Create the docker image for `quanta-proxy` as follows:
 ```bash
-docker build -t containerregistry.disney.com/digital/quanta-proxy:latest -f Docker/DeployProxyDockerfile .
+docker build -t <docker_repository> -f Docker/DeployProxyDockerfile .
 ```
 Push the proxy to the Docker repository as previously outlined under `quanta-node`.
 
 Create the docker image for `quanta-loader` as follows:
 ```bash
-docker build -t containerregistry.disney.com/digital/quanta-loader:latest -f Docker/DeployLoaderDockerfile .
+docker build -t <docker_repository> -f Docker/DeployLoaderDockerfile .
 ```
 Push the loader to the Docker repository as previously outlined under `quanta-node`.
 
@@ -176,7 +176,7 @@ script
       -p 0.0.0.0:4000:4000 \
       -e "DATA_DIR=/data/${HOSTNAME}" \
       -e "BIND=0.0.0.0" \
-      -t containerregistry.disney.com/digital/quanta-node:latest
+      -t <docker_repository>
 end script
 ```
 
@@ -199,7 +199,7 @@ script
       -e "SCHEMA_DIR=/data/config" \
       -e "METADATA_DIR=/data/metadata" \
       -e "PUBLIC_KEY_URL=https://cognito-idp.us-east-1.amazonaws.com/us-east-1_hQV7XE2Jz/.well-known/jwks.json" \
-      -t containerregistry.disney.com/digital/quanta-proxy:latest
+      -t <docker_repository>
 end script
 ```
 
@@ -214,7 +214,7 @@ docker run --name quanta-loader --net=host --rm --ulimit nofile=262144:262144 \
   -e "METADATA_DIR=/metadata" \
   -e "AWS_ACCESS_KEY_ID=<my-access-key" \
   -e "AWS_SECRET_ACCESS_KEY=<my-secret-key>" \
-  -t containerregistry.disney.com/digital/quanta-loader:latest
+  -t <docker_repository>
 ```
 
 # Health Check 
