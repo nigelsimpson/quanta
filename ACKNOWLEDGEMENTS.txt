@@ -9,6 +9,7 @@ a division of The Walt Disney Company ("TWDC"), we would like to acknowledge and
 thank the following individuals for their contributions to Quanta:
 
 ©2020-2021 Guy A. Molinari
+©2021      Curtis Deems
 ©2021      Phat Ky
 
 Redistribution and use in source and binary forms, with or without modification,
