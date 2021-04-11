@@ -5,7 +5,7 @@ FROM frolvlad/alpine-glibc
 
 LABEL version="1.0.0" \
   maintainer="Guy Molinari" \
-  maintainer.email="guy.molinari@disney.com" \
+  maintainer.email="molinariguy@gmail.com" \
   description="Builds Docker image for use in production deployment of QUANTA server nodes" \
   repository="https://github.com/disney-platforms/quanta"
 
