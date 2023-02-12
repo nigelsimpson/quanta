@@ -1,7 +1,7 @@
 # QUANTA server node deployment within a Docker Container
 
 #FROM amd64/alpine:latest
-FROM frolvlad/alpine-glibc
+FROM frolvlad/alpine-glibc:alpine-3.17_glibc-2.34
 
 LABEL version="1.0.0" \
   maintainer="Guy Molinari" \
